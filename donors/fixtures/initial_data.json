@@ -1,0 +1,331 @@
+[
+  {
+    "model": "donors.bloodtype",
+    "pk": 1,
+    "fields": {
+      "name": "O+",
+      "slug": "o-pos"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 2,
+    "fields": {
+      "name": "O-",
+      "slug": "o-neg"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 3,
+    "fields": {
+      "name": "A+",
+      "slug": "a-pos"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 4,
+    "fields": {
+      "name": "A-",
+      "slug": "a-neg"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 5,
+    "fields": {
+      "name": "B+",
+      "slug": "b-pos"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 6,
+    "fields": {
+      "name": "B-",
+      "slug": "b-neg"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 7,
+    "fields": {
+      "name": "AB+",
+      "slug": "ab-pos"
+    }
+  },
+  {
+    "model": "donors.bloodtype",
+    "pk": 8,
+    "fields": {
+      "name": "AB-",
+      "slug": "ab-neg"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$OKSffA3dIvHCw7z3n4slLQ$4yHpTQIXhL4O2FcBHqkK3ou8ZdAn2QrG1cLa4rpnQj0=",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "username": "rahul",
+      "first_name": "Rahul",
+      "last_name": "Mehta",
+      "email": "rahul@uwindsor.ca",
+      "date_joined": "2026-10-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "donors.donorprofile",
+    "pk": 1,
+    "fields": {
+      "user": 2,
+      "blood_type": 1,
+      "city": "Windsor",
+      "phone": "",
+      "available": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$OKSffA3dIvHCw7z3n4slLQ$4yHpTQIXhL4O2FcBHqkK3ou8ZdAn2QrG1cLa4rpnQj0=",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "username": "sara",
+      "first_name": "Sara",
+      "last_name": "Lopez",
+      "email": "sara@uwindsor.ca",
+      "date_joined": "2026-10-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "donors.donorprofile",
+    "pk": 2,
+    "fields": {
+      "user": 3,
+      "blood_type": 2,
+      "city": "Windsor",
+      "phone": "",
+      "available": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$OKSffA3dIvHCw7z3n4slLQ$4yHpTQIXhL4O2FcBHqkK3ou8ZdAn2QrG1cLa4rpnQj0=",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "username": "wei",
+      "first_name": "Wei",
+      "last_name": "Chen",
+      "email": "wei@uwindsor.ca",
+      "date_joined": "2026-10-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "donors.donorprofile",
+    "pk": 3,
+    "fields": {
+      "user": 4,
+      "blood_type": 5,
+      "city": "Tecumseh",
+      "phone": "",
+      "available": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$OKSffA3dIvHCw7z3n4slLQ$4yHpTQIXhL4O2FcBHqkK3ou8ZdAn2QrG1cLa4rpnQj0=",
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "username": "amara",
+      "first_name": "Amara",
+      "last_name": "Okoye",
+      "email": "amara@uwindsor.ca",
+      "date_joined": "2026-10-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "donors.donorprofile",
+    "pk": 4,
+    "fields": {
+      "user": 5,
+      "blood_type": 3,
+      "city": "Windsor",
+      "phone": "",
+      "available": true
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 1,
+    "fields": {
+      "requester": 3,
+      "blood_type": 2,
+      "patient": "Emergency surgery patient",
+      "hospital": "Windsor Regional Hospital",
+      "city": "Windsor",
+      "units": 2,
+      "urgency": "critical",
+      "status": "open",
+      "notes": "O- needed urgently for a surgery scheduled tonight.",
+      "created_at": "2026-10-21T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 2,
+    "fields": {
+      "requester": 2,
+      "blood_type": 1,
+      "patient": "Road accident victim",
+      "hospital": "Met Campus ER",
+      "city": "Windsor",
+      "units": 3,
+      "urgency": "urgent",
+      "status": "open",
+      "notes": "Multiple units of O+ required after a car accident.",
+      "created_at": "2026-10-22T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 3,
+    "fields": {
+      "requester": 5,
+      "blood_type": 3,
+      "patient": "Cancer patient (chemo)",
+      "hospital": "Windsor Regional Hospital",
+      "city": "Windsor",
+      "units": 1,
+      "urgency": "urgent",
+      "status": "open",
+      "notes": "A+ platelets needed for ongoing chemotherapy.",
+      "created_at": "2026-10-23T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 4,
+    "fields": {
+      "requester": 4,
+      "blood_type": 5,
+      "patient": "Childbirth complication",
+      "hospital": "Erie Shores HealthCare",
+      "city": "Leamington",
+      "units": 2,
+      "urgency": "critical",
+      "status": "open",
+      "notes": "B+ needed for a mother after delivery.",
+      "created_at": "2026-10-24T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 5,
+    "fields": {
+      "requester": 2,
+      "blood_type": 7,
+      "patient": "Anaemia patient",
+      "hospital": "Hotel-Dieu Grace",
+      "city": "Windsor",
+      "units": 1,
+      "urgency": "normal",
+      "status": "open",
+      "notes": "AB+ transfusion for a scheduled procedure next week.",
+      "created_at": "2026-10-25T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 6,
+    "fields": {
+      "requester": 3,
+      "blood_type": 4,
+      "patient": "Dialysis patient",
+      "hospital": "Windsor Regional Hospital",
+      "city": "Windsor",
+      "units": 1,
+      "urgency": "urgent",
+      "status": "open",
+      "notes": "A- required for a regular dialysis patient.",
+      "created_at": "2026-10-26T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 7,
+    "fields": {
+      "requester": 5,
+      "blood_type": 1,
+      "patient": "Surgery prep",
+      "hospital": "Met Campus",
+      "city": "Tecumseh",
+      "units": 2,
+      "urgency": "normal",
+      "status": "matched",
+      "notes": "O+ arranged, confirming a backup donor.",
+      "created_at": "2026-10-27T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.bloodrequest",
+    "pk": 8,
+    "fields": {
+      "requester": 4,
+      "blood_type": 6,
+      "patient": "Trauma patient",
+      "hospital": "Windsor Regional Hospital",
+      "city": "Windsor",
+      "units": 2,
+      "urgency": "critical",
+      "status": "fulfilled",
+      "notes": "B- was found in time. Thank you donors!",
+      "created_at": "2026-10-28T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.review",
+    "pk": 1,
+    "fields": {
+      "reviewer": 3,
+      "user": 2,
+      "rating": 5,
+      "comment": "Responded quickly and was very grateful. Smooth donation.",
+      "created_at": "2026-10-28T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.review",
+    "pk": 2,
+    "fields": {
+      "reviewer": 4,
+      "user": 2,
+      "rating": 5,
+      "comment": "Great communication, met at the hospital on time.",
+      "created_at": "2026-10-28T09:00:00Z"
+    }
+  },
+  {
+    "model": "donors.review",
+    "pk": 3,
+    "fields": {
+      "reviewer": 2,
+      "user": 3,
+      "rating": 4,
+      "comment": "Kind and organised. Thank you for coordinating.",
+      "created_at": "2026-10-28T09:00:00Z"
+    }
+  }
+]

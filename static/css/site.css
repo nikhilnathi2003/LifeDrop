@@ -1,0 +1,58 @@
+:root {
+  --ld-primary: #c1121f;
+  --ld-dark: #780000;
+  --ld-accent: #e5383b;
+  --ld-ink: #1f2937;
+}
+
+body { background: #fbf6f6; color: var(--ld-ink); }
+
+.ld-navbar { background: linear-gradient(90deg, var(--ld-primary), var(--ld-dark)); }
+.ld-navbar .nav-link { color: rgba(255,255,255,.9); }
+.ld-navbar .nav-link:hover { color: #fff; }
+.ld-search { flex: 1; max-width: 640px; }
+
+.ld-hero {
+  background: linear-gradient(120deg, var(--ld-primary), var(--ld-dark));
+  color: #fff; border-radius: 1rem;
+}
+
+.ld-card {
+  border: none; border-radius: .85rem; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  transition: transform .12s ease, box-shadow .12s ease;
+  background: #fff; height: 100%;
+}
+.ld-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(193,18,31,.15); }
+.ld-card .ld-thumb {
+  height: 160px; background: #f6e7e7; display: flex; align-items: center;
+  justify-content: center; color: #c99; font-size: 2.4rem;
+}
+.ld-card .ld-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.ld-type {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:3rem; height:3rem; border-radius:50%;
+  background: var(--ld-primary); color:#fff; font-weight:700;
+}
+.ld-chip { display:inline-block; padding:.2rem .6rem; border-radius:999px;
+  background:#fdeaea; color:var(--ld-dark); font-size:.8rem; margin:.1rem; }
+.badge-verified { background: #0f9d58; }
+.badge-urgency-urgent { background: var(--ld-primary); }
+.badge-urgency-critical { background: #7a0177; }
+.badge-urgency-normal { background: #6c757d; }
+
+.btn-primary { background: var(--ld-primary); border-color: var(--ld-primary); }
+.btn-primary:hover { background: var(--ld-dark); border-color: var(--ld-dark); }
+.btn-outline-primary { color: var(--ld-primary); border-color: var(--ld-primary); }
+.btn-outline-primary:hover { background: var(--ld-primary); border-color: var(--ld-primary); }
+a { color: var(--ld-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.ld-footer { background: #1f2937; color: #cbd5e1; }
+.ld-footer a { color: #cbd5e1; }
+.ld-footer a:hover { color: #fff; }
+
+.type-tile { border-radius:.85rem; background:#fff; padding:1.1rem; text-align:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.08); color:var(--ld-dark); font-weight:600; }
+.type-tile .t { font-size:1.5rem; color:var(--ld-primary); font-weight:700; }
