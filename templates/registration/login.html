@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-5">
+  <div class="card"><div class="card-body p-4">
+    <h4 class="fw-bold mb-3">Log in</h4>
+    {% if form.errors %}<div class="alert alert-danger">Wrong username or password. Try again.</div>{% endif %}
+    <form method="post">{% csrf_token %}
+      <div class="mb-3"><label class="form-label">Username</label><input name="username" class="form-control" autofocus></div>
+      <div class="mb-3"><label class="form-label">Password</label><input name="password" type="password" class="form-control"></div>
+      <button class="btn btn-primary w-100">Log in</button>
+    </form>
+    <div class="d-flex justify-content-between small mt-3">
+      <a href="{% url 'password_reset' %}">Forgot password?</a>
+      <a href="{% url 'register' %}">Create account</a>
+    </div>
+  </div></div>
+</div></div>
+{% endblock %}
