@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Find blood requests{% endblock %}
+{% block content %}
+
+<div class="ld-hero p-4 p-md-5 mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <h1 class="fw-bold mb-2">Give blood. Save a life.</h1>
+      <p class="mb-3 opacity-75">Browse urgent blood requests near you and offer to donate.
+        {% if not user.is_authenticated %}Create a free account to post a request or message a donor.{% endif %}</p>
+      {% if user.is_authenticated %}
+        <a href="{% url 'post_request' %}" class="btn btn-light fw-semibold"><i class="bi bi-plus-lg"></i> Post a request</a>
+      {% else %}
+        <a href="{% url 'register' %}" class="btn btn-light fw-semibold">Join LifeDrop</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="fw-bold mb-0">
+    {% if request.GET.keyword or request.GET.city or request.GET.blood_type %}Search results{% else %}Open requests{% endif %}
+    <span class="text-muted fw-normal">({{ total }})</span>
+  </h5>
+  {% if request.GET.keyword or request.GET.city or request.GET.blood_type %}<a href="{% url 'home' %}" class="small">Clear filters</a>{% endif %}
+</div>
+
+<div class="row g-3">
+  {% for req in requests %}
+  <div class="col-sm-6 col-lg-4">
+    <div class="card ld-card">
+      <div class="ld-thumb">
+        {% with req.images.first as img %}
+          {% if img %}<img src="{{ img.image.url }}" alt="">{% else %}<i class="bi bi-hospital"></i>{% endif %}
+        {% endwith %}
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <span class="ld-type">{{ req.blood_type.name }}</span>
+          <span class="badge badge-urgency-{{ req.urgency }}">{{ req.get_urgency_display }}</span>
+        </div>
+        <h6 class="fw-bold mt-2 mb-1">{{ req.patient }}</h6>
+        <div class="small text-muted mb-2">
+          <i class="bi bi-geo-alt"></i> {{ req.hospital }}, {{ req.city }}<br>
+          <i class="bi bi-droplet"></i> {{ req.units }} unit{{ req.units|pluralize }} · {{ req.get_status_display }}
+        </div>
+        <a href="{% url 'request_detail' req.pk %}" class="btn btn-sm btn-outline-primary w-100">View details</a>
+        <form method="post" action="{% url 'toggle_saved' req.pk %}" class="text-center mt-1">{% csrf_token %}
+          {% if req.pk in request.session.saved_requests %}
+            <button class="btn btn-sm btn-link text-decoration-none p-0"><i class="bi bi-bookmark-fill"></i> Saved</button>
+          {% else %}
+            <button class="btn btn-sm btn-link text-decoration-none p-0"><i class="bi bi-bookmark"></i> Save for later</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <div class="col-12"><div class="alert alert-light border text-center py-4">
+      No requests match your search. <a href="{% url 'home' %}">See all open requests</a>.
+    </div></div>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav class="mt-4"><ul class="pagination justify-content-center">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>{% endif %}
+  <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+
+{% endblock %}
