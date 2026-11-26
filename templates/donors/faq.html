@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}FAQ – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow"><i class="bi bi-question-circle"></i> FAQ</span>
+    <h2 class="ld-section-title mt-2">Good to know</h2>
+    <p class="text-muted">Still unsure? <a href="{% url 'contact' %}">Contact us</a>.</p>
+  </div>
+  <div class="row justify-content-center"><div class="col-lg-8">
+    <div class="accordion" id="faqAcc">
+      {% for q, a in faqs %}
+      <div class="accordion-item">
+        <h2 class="accordion-header"><button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" data-bs-toggle="collapse" data-bs-target="#q{{ forloop.counter }}">{{ q }}</button></h2>
+        <div id="q{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAcc">
+          <div class="accordion-body text-muted">{{ a }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div></div>
+</div>
+{% endblock %}

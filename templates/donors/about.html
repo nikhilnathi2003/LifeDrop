@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About LifeDrop{% endblock %}
+{% block content %}
+
+<section class="container pt-4">
+  <div class="ld-hero2 p-4 p-lg-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <span class="ld-eyebrow"><i class="bi bi-info-circle"></i> About us</span>
+        <h1 class="mt-3">Blood when it’s needed, <span class="hl">from people nearby</span>.</h1>
+        <p class="lead mt-3 mb-0">A simple way to connect blood donors with patients who urgently need their type — in one place, in real time.</p>
+      </div>
+      <div class="col-lg-5">
+        <img src="{% static 'img/hero.svg' %}" alt="Blood donation" class="ld-hero-img">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <p class="fs-5">When a patient needs blood urgently, families end up calling around and posting in scattered
+      group chats, and willing donors never know when they are needed. LifeDrop brings it into one place: post a
+      request with the blood type and city, and matching donors can see it and offer to help right away.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container mt-4">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="ld-feature h-100">
+        <span class="ld-ic ic-red mb-3"><i class="bi bi-search-heart"></i></span>
+        <h6 class="fw-bold">Find fast</h6>
+        <p class="small text-muted mb-0">Search open requests by blood type and city, and see what’s needed closest to you.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ld-feature h-100">
+        <span class="ld-ic ic-teal mb-3"><i class="bi bi-droplet-fill"></i></span>
+        <h6 class="fw-bold">Offer to donate</h6>
+        <p class="small text-muted mb-0">Reach out to a requester in one click and arrange to help — no middlemen.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ld-feature h-100">
+        <span class="ld-ic ic-gold mb-3"><i class="bi bi-patch-check"></i></span>
+        <h6 class="fw-bold">Verified donors</h6>
+        <p class="small text-muted mb-0">Upload a donor card to earn a Verified badge that requesters can trust.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container my-5">
+  <div class="ld-impact p-4 p-md-5">
+    <div class="ld-dropbig"><i class="bi bi-droplet-fill"></i></div>
+    <div class="row align-items-center position-relative g-3">
+      <div class="col-md-8">
+        <h3 class="fw-bold mb-1">Our mission</h3>
+        <p class="mb-0 opacity-75">To make sure no patient waits for blood because the right donor simply didn’t know. We’re a student team building technology that turns willing donors into timely help.</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <a href="{% url 'team' %}" class="btn btn-light btn-lg">Meet the team</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

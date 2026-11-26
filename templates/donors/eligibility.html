@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Am I eligible? – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow"><i class="bi bi-clipboard2-pulse"></i> Eligibility</span>
+    <h2 class="ld-section-title mt-2">Can I donate blood?</h2>
+    <p class="text-muted">A quick checklist, plus who your blood type can help.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="ld-feature h-100">
+        <h5 class="fw-bold mb-3">Basic checklist</h5>
+        {% for item, ok in checklist %}
+          <div class="d-flex align-items-center gap-2 py-2 border-bottom">
+            <i class="bi bi-check-circle-fill text-success"></i> <span>{{ item }}</span>
+          </div>
+        {% endfor %}
+        <p class="small text-muted mt-3 mb-0">This is general guidance — the donation centre does the final check.</p>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="ld-feature h-100">
+        <h5 class="fw-bold mb-3">Who can you give to?</h5>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th>Your type</th><th>Can donate red cells to</th></tr></thead>
+            <tbody>
+              {% for bt, targets in compatibility %}
+              <tr>
+                <td><span class="ld-type" style="width:2.4rem;height:2.4rem;font-size:.85rem">{{ bt }}</span></td>
+                <td>{% for t in targets %}<span class="match-pill">{{ t }}</span> {% endfor %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="small text-muted mb-0"><strong>O−</strong> is the universal donor · <strong>AB+</strong> is the universal recipient.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'donor_directory' %}" class="btn btn-outline-primary">Find donors near you</a>
+    <a href="{% url 'register' %}" class="btn btn-primary">Register as a donor</a>
+  </div>
+</div>
+{% endblock %}

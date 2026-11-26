@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Team – Group 6{% endblock %}
+{% block content %}
+
+<section class="container pt-4">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow"><i class="bi bi-people-fill"></i> Group 6</span>
+    <h1 class="ld-section-title mt-2">The team behind LifeDrop</h1>
+    <p class="text-muted">COMP 8347 — Internet Applications &amp; Distributed Systems · University of Windsor · Fall 2026</p>
+  </div>
+
+  <div class="row g-4">
+    {% for name, focus, models in members %}
+    <div class="col-md-6 col-lg-4">
+      <div class="ld-feature h-100 d-flex gap-3 align-items-start">
+        <span class="ld-avatar" style="width:3rem;height:3rem;font-size:1.1rem;flex:0 0 auto">{{ name|first }}</span>
+        <div>
+          <h6 class="fw-bold mb-1">{{ name }}</h6>
+          <div class="small text-muted">{{ focus }}</div>
+          <div class="mt-2"><span class="ld-chip"><i class="bi bi-box"></i> {{ models }}</span></div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="ld-cta p-4 p-md-5 text-center mt-5 mb-5">
+    <div class="ld-dots-light"></div>
+    <div class="position-relative">
+      <h3 class="fw-bold mb-2">Want to help us save more lives?</h3>
+      <p class="opacity-75 mb-3">Register as a donor and be ready when your blood type is needed.</p>
+      <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-heart-fill"></i> Become a donor</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
