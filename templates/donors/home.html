@@ -1,73 +1,379 @@
 {% extends "base.html" %}
-{% block title %}Find blood requests{% endblock %}
+{% load static %}
+{% block title %}LifeDrop — Give blood, save a life{% endblock %}
 {% block content %}
 
-<div class="ld-hero p-4 p-md-5 mb-4">
-  <div class="row align-items-center">
-    <div class="col-md-8">
-      <h1 class="fw-bold mb-2">Give blood. Save a life.</h1>
-      <p class="mb-3 opacity-75">Browse urgent blood requests near you and offer to donate.
-        {% if not user.is_authenticated %}Create a free account to post a request or message a donor.{% endif %}</p>
-      {% if user.is_authenticated %}
-        <a href="{% url 'post_request' %}" class="btn btn-light fw-semibold"><i class="bi bi-plus-lg"></i> Post a request</a>
-      {% else %}
-        <a href="{% url 'register' %}" class="btn btn-light fw-semibold">Join LifeDrop</a>
-      {% endif %}
-    </div>
-  </div>
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h5 class="fw-bold mb-0">
-    {% if request.GET.keyword or request.GET.city or request.GET.blood_type %}Search results{% else %}Open requests{% endif %}
-    <span class="text-muted fw-normal">({{ total }})</span>
-  </h5>
-  {% if request.GET.keyword or request.GET.city or request.GET.blood_type %}<a href="{% url 'home' %}" class="small">Clear filters</a>{% endif %}
-</div>
-
-<div class="row g-3">
-  {% for req in requests %}
-  <div class="col-sm-6 col-lg-4">
-    <div class="card ld-card">
-      <div class="ld-thumb">
-        {% with req.images.first as img %}
-          {% if img %}<img src="{{ img.image.url }}" alt="">{% else %}<i class="bi bi-hospital"></i>{% endif %}
-        {% endwith %}
-      </div>
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <span class="ld-type">{{ req.blood_type.name }}</span>
-          <span class="badge badge-urgency-{{ req.urgency }}">{{ req.get_urgency_display }}</span>
-        </div>
-        <h6 class="fw-bold mt-2 mb-1">{{ req.patient }}</h6>
-        <div class="small text-muted mb-2">
-          <i class="bi bi-geo-alt"></i> {{ req.hospital }}, {{ req.city }}<br>
-          <i class="bi bi-droplet"></i> {{ req.units }} unit{{ req.units|pluralize }} · {{ req.get_status_display }}
-        </div>
-        <a href="{% url 'request_detail' req.pk %}" class="btn btn-sm btn-outline-primary w-100">View details</a>
-        <form method="post" action="{% url 'toggle_saved' req.pk %}" class="text-center mt-1">{% csrf_token %}
-          {% if req.pk in request.session.saved_requests %}
-            <button class="btn btn-sm btn-link text-decoration-none p-0"><i class="bi bi-bookmark-fill"></i> Saved</button>
+{% if not request.GET.keyword and not request.GET.blood_type and not request.GET.city %}
+<!-- ============ HERO ============ -->
+<section class="container pt-4">
+  <div class="ld-hero2 p-4 p-lg-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="ld-badge-live mb-3"><span class="pulse-dot"></span> {{ total }} open request{{ total|pluralize }} right now</span>
+        <h1>Give blood,<br><span class="hl">save a life</span> nearby.</h1>
+        <p class="lead mt-3 mb-4">Someone needs your blood type close to you right now. Find urgent requests or post one in seconds — and reach willing donors fast.</p>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          {% if user.is_authenticated %}
+            <a href="{% url 'post_request' %}" class="btn btn-primary btn-lg px-4"><i class="bi bi-plus-circle"></i> Post a request</a>
           {% else %}
-            <button class="btn btn-sm btn-link text-decoration-none p-0"><i class="bi bi-bookmark"></i> Save for later</button>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4"><i class="bi bi-heart-fill"></i> Become a donor</a>
           {% endif %}
-        </form>
+          <a href="#requests" class="btn btn-light btn-lg px-4"><i class="bi bi-search"></i> Browse requests</a>
+        </div>
+        <div class="d-flex flex-wrap gap-4 small text-muted">
+          <span><i class="bi bi-shield-check text-danger"></i> Verified donors</span>
+          <span><i class="bi bi-lightning-charge-fill text-danger"></i> Instant alerts</span>
+          <span><i class="bi bi-cash-coin text-danger"></i> 100% free</span>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <img src="{% static 'img/hero.svg' %}" alt="Blood donation" class="ld-hero-img">
       </div>
     </div>
   </div>
-  {% empty %}
-    <div class="col-12"><div class="alert alert-light border text-center py-4">
-      No requests match your search. <a href="{% url 'home' %}">See all open requests</a>.
-    </div></div>
-  {% endfor %}
-</div>
+</section>
 
-{% if is_paginated %}
-<nav class="mt-4"><ul class="pagination justify-content-center">
-  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>{% endif %}
-  <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
-</ul></nav>
+<!-- ============ STATS ============ -->
+<section class="container mt-4">
+  <div class="row g-3 reveal">
+    <div class="col-6 col-md-3">
+      <div class="ld-statcard sc-red"><div class="n" data-count="{{ stats.open }}">0</div><div class="l"><i class="bi bi-droplet-half"></i> Open requests now</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="ld-statcard sc-grape"><div class="n" data-count="{{ stats.critical }}">0</div><div class="l"><i class="bi bi-exclamation-triangle"></i> Critical right now</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="ld-statcard sc-teal"><div class="n" data-count="{{ stats.donors }}">0</div><div class="l"><i class="bi bi-people-fill"></i> Donors available</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="ld-statcard sc-amber"><div class="n" data-count="{{ stats.fulfilled }}">0</div><div class="l"><i class="bi bi-heart-fill"></i> Lives helped</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BLOOD TYPES ============ -->
+<section class="container mt-5">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow"><i class="bi bi-droplet-fill"></i> Find by type</span>
+    <h2 class="ld-section-title mt-2">Which blood type is needed?</h2>
+    <p class="text-muted">Tap a group to see matching open requests near you.</p>
+  </div>
+  <div class="row g-3 justify-content-center">
+    {% for bt in nav_blood_types %}
+    <div class="col-4 col-sm-3 col-md-auto">
+      <a href="?blood_type={{ bt.id }}" class="text-decoration-none">
+        <div class="type-tile reveal">
+          <span class="t t-{% cycle 'red' 'grape' 'teal' 'amber' 'rose' 'sky' 'pink' 'crimson' %}">{{ bt.name }}</span>
+          <div><small>View requests</small></div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 {% endif %}
 
+<!-- ============ REQUESTS ============ -->
+<section class="container mt-5" id="requests">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h2 class="ld-section-title mb-0">
+      {% if request.GET.keyword %}Results for “{{ request.GET.keyword }}”
+      {% elif request.GET.blood_type or request.GET.city %}Filtered requests
+      {% else %}Open blood requests{% endif %}
+      <span class="text-muted fs-5">({{ total }})</span>
+    </h2>
+    {% if user.is_authenticated %}
+      <a href="{% url 'post_request' %}" class="btn btn-outline-primary"><i class="bi bi-plus-circle"></i> Post a request</a>
+    {% endif %}
+  </div>
+
+  <div class="mb-3 d-flex gap-2 flex-wrap">
+    <a href="?" class="btn btn-sm {% if not active_urgency %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+    <a href="?urgency=critical" class="btn btn-sm {% if active_urgency == 'critical' %}btn-primary{% else %}btn-outline-primary{% endif %}">🟣 Critical</a>
+    <a href="?urgency=urgent" class="btn btn-sm {% if active_urgency == 'urgent' %}btn-primary{% else %}btn-outline-primary{% endif %}">🔴 Urgent</a>
+    <a href="?urgency=normal" class="btn btn-sm {% if active_urgency == 'normal' %}btn-primary{% else %}btn-outline-primary{% endif %}">⚪ Normal</a>
+  </div>
+
+  <div class="row g-3">
+    {% for r in requests %}
+    <div class="col-sm-6 col-lg-4">
+      <a href="{% url 'request_detail' r.pk %}" class="text-decoration-none text-reset">
+        <div class="ld-card u-{{ r.urgency }} p-3 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <span class="ld-type">{{ r.blood_type.name }}</span>
+            <span class="badge badge-urgency-{{ r.urgency }}">{{ r.get_urgency_display }}</span>
+          </div>
+          <div class="fw-semibold mt-3 fs-5">{{ r.patient }}</div>
+          <div class="small text-muted"><i class="bi bi-hospital"></i> {{ r.hospital }}, {{ r.city }}</div>
+          <hr class="my-2" style="opacity:.08">
+          <div class="d-flex justify-content-between align-items-center small">
+            <span><i class="bi bi-droplet-half text-danger"></i> {{ r.units }} unit{{ r.units|pluralize }} needed</span>
+            <span class="text-muted"><i class="bi bi-clock"></i> {{ r.created_at|date:"M d" }}</span>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% empty %}
+      <div class="col-12"><div class="alert alert-light border text-center py-5">
+        <i class="bi bi-droplet fs-1 text-danger d-block mb-2"></i>
+        No open requests found.{% if user.is_authenticated %} <a href="{% url 'post_request' %}">Post one</a>.{% endif %}
+      </div></div>
+    {% endfor %}
+  </div>
+
+  {% if is_paginated %}
+  <nav class="mt-4"><ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+</section>
+
+{% if not request.GET.keyword and not request.GET.blood_type and not request.GET.city %}
+<!-- ============ HOW IT WORKS ============ -->
+<section class="ld-dots py-5 mt-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <span class="ld-eyebrow e-sky"><i class="bi bi-signpost-2"></i> How it works</span>
+      <h2 class="ld-section-title mt-2">Help in three simple steps</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="ld-feature reveal">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="ld-ic ic-red"><i class="bi bi-search-heart"></i></span>
+            <span class="ld-step-num">01</span>
+          </div>
+          <h5 class="fw-bold">Find a request</h5>
+          <p class="text-muted mb-0 small">Search open requests by blood type and city, or get alerted when your type is needed nearby.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="ld-feature reveal">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="ld-ic ic-teal"><i class="bi bi-chat-heart"></i></span>
+            <span class="ld-step-num">02</span>
+          </div>
+          <h5 class="fw-bold">Offer to donate</h5>
+          <p class="text-muted mb-0 small">Message the requester and offer to help in one click. No phone trees, no scattered group chats.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="ld-feature reveal">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="ld-ic ic-gold"><i class="bi bi-patch-check"></i></span>
+            <span class="ld-step-num">03</span>
+          </div>
+          <h5 class="fw-bold">Donate & save a life</h5>
+          <p class="text-muted mb-0 small">Meet at the hospital, donate, and earn a Verified badge by uploading your donor card.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPATIBILITY CHECKER ============ -->
+<section class="container mt-5" id="compat">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-5">
+      <span class="ld-eyebrow e-teal"><i class="bi bi-diagram-3"></i> Know your match</span>
+      <h2 class="ld-section-title mt-2">Blood compatibility checker</h2>
+      <p class="text-muted">Not every type can give to every patient. Pick a donor blood group to instantly see who they can help — a quick way to know if you’re the match a request needs.</p>
+      <div class="d-flex gap-3 small">
+        <span><span class="ld-avatar" style="width:1.4rem;height:1.4rem;display:inline-grid"></span></span>
+        <span class="text-muted"><i class="bi bi-info-circle text-danger"></i> O− is the universal donor · AB+ is the universal recipient.</span>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="ld-compat p-4">
+        <div class="small text-muted mb-2 fw-semibold">I am blood type…</div>
+        <div class="row g-2 mb-3" id="compatBtns">
+          <div class="col-3"><button class="chip-btn" data-t="O-">O−</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="O+">O+</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="A-">A−</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="A+">A+</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="B-">B−</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="B+">B+</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="AB-">AB−</button></div>
+          <div class="col-3"><button class="chip-btn" data-t="AB+">AB+</button></div>
+        </div>
+        <div class="small text-muted mb-1 fw-semibold">…you can donate red cells to:</div>
+        <div id="compatOut" class="pt-1"><span class="text-muted small">Pick your blood type above.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IMPACT BAND ============ -->
+<section class="container mt-5">
+  <div class="ld-impact p-4 p-md-5 reveal">
+    <div class="ld-dropbig"><i class="bi bi-droplet-fill"></i></div>
+    <div class="row align-items-center g-4 position-relative">
+      <div class="col-md-8">
+        <h2 class="fw-bold mb-2">One donation can save up to <span style="color:#ffd0d2">three lives</span>.</h2>
+        <p class="mb-0 opacity-75">Every two seconds someone needs blood. It can’t be manufactured — it can only come from people like you. Your 20 minutes could be someone’s lifetime.</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4">Start donating</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY LIFEDROP ============ -->
+<section class="container mt-5">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow e-amber"><i class="bi bi-stars"></i> Why LifeDrop</span>
+    <h2 class="ld-section-title mt-2">Built for real emergencies</h2>
+  </div>
+  <div class="row g-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="ld-feature reveal text-center">
+        <span class="ld-ic ic-red mb-3"><i class="bi bi-geo-alt"></i></span>
+        <h6 class="fw-bold">Nearby first</h6>
+        <p class="small text-muted mb-0">See requests closest to you so help arrives faster.</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="ld-feature reveal text-center">
+        <span class="ld-ic ic-teal mb-3"><i class="bi bi-patch-check"></i></span>
+        <h6 class="fw-bold">Verified donors</h6>
+        <p class="small text-muted mb-0">Donor cards are checked so requesters can trust offers.</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="ld-feature reveal text-center">
+        <span class="ld-ic ic-grape mb-3"><i class="bi bi-images"></i></span>
+        <h6 class="fw-bold">Rich requests</h6>
+        <p class="small text-muted mb-0">Add photos and details so donors know exactly what’s needed.</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="ld-feature reveal text-center">
+        <span class="ld-ic ic-sky mb-3"><i class="bi bi-chat-dots"></i></span>
+        <h6 class="fw-bold">Direct messaging</h6>
+        <p class="small text-muted mb-0">Coordinate privately with the family in a click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="ld-dots py-5 mt-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <span class="ld-eyebrow e-grape"><i class="bi bi-chat-quote"></i> Stories</span>
+      <h2 class="ld-section-title mt-2">People helping people</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="ld-quote reveal">
+          <div class="stars mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <p class="mb-0">“I posted at 2am when my father needed O−. Two verified donors replied within twenty minutes. I can’t describe the relief.”</p>
+          <div class="who"><span class="ld-avatar">P</span><div><div class="fw-semibold small">Priya S.</div><div class="text-muted small">Requester · Windsor</div></div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="ld-quote reveal">
+          <div class="stars mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+          <p class="mb-0">“Being a donor finally feels useful. I get a ping when my type is needed close by and I just show up.”</p>
+          <div class="who"><span class="ld-avatar">M</span><div><div class="fw-semibold small">Marcus L.</div><div class="text-muted small">Donor · A+</div></div></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="ld-quote reveal">
+          <div class="stars mb-2"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+          <p class="mb-0">“Way better than hunting through WhatsApp groups. Everything in one place, with real details and photos.”</p>
+          <div class="who"><span class="ld-avatar">A</span><div><div class="fw-semibold small">Aisha R.</div><div class="text-muted small">Donor · B−</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARTNERS ============ -->
+<section class="container mt-5">
+  <p class="text-center text-muted small text-uppercase mb-3" style="letter-spacing:.1em">Working alongside local hospitals &amp; blood banks</p>
+  <div class="row justify-content-center align-items-center g-4">
+    <div class="col-auto"><span class="ld-partner"><i class="bi bi-hospital"></i> Windsor Regional</span></div>
+    <div class="col-auto"><span class="ld-partner"><i class="bi bi-plus-square-fill"></i> MetroCare</span></div>
+    <div class="col-auto"><span class="ld-partner"><i class="bi bi-droplet-fill"></i> RedCross Local</span></div>
+    <div class="col-auto"><span class="ld-partner"><i class="bi bi-heart-pulse"></i> City Blood Bank</span></div>
+    <div class="col-auto"><span class="ld-partner"><i class="bi bi-building"></i> Essex Health</span></div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="container mt-5" id="faq">
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <span class="ld-eyebrow"><i class="bi bi-question-circle"></i> FAQ</span>
+      <h2 class="ld-section-title mt-2">Good to know</h2>
+      <p class="text-muted">Everything you need before you give. Still unsure? <a href="{% url 'contact' %}">Contact us</a>.</p>
+    </div>
+    <div class="col-lg-8">
+      <div class="accordion" id="faqAcc">
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#q1">Who can donate blood?</button></h2>
+          <div id="q1" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body small text-muted">Most healthy adults aged 17–65 who weigh at least 50&nbsp;kg can donate. You can give whole blood every 56 days.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#q2">Is LifeDrop free to use?</button></h2>
+          <div id="q2" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body small text-muted">Yes — posting a request, browsing, and offering to donate are completely free. LifeDrop never charges patients or donors.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#q3">How does the Verified badge work?</button></h2>
+          <div id="q3" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body small text-muted">Upload a photo of your blood donor card to your profile. Once reviewed, a Verified badge appears on your offers so requesters know they can trust you.</div></div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#q4">Does donating hurt or take long?</button></h2>
+          <div id="q4" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body small text-muted">The donation itself takes about 8–10 minutes; the whole visit is around 45 minutes. Most people feel just a quick pinch.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="container my-5">
+  <div class="ld-cta p-4 p-md-5 text-center reveal">
+    <div class="ld-dots-light"></div>
+    <div class="position-relative">
+      <h2 class="fw-bold mb-2">Your blood type could be the one someone is searching for.</h2>
+      <p class="opacity-75 mb-4">Join {{ 1850 }}+ donors already saving lives in their community.</p>
+      <div class="d-flex justify-content-center flex-wrap gap-2">
+        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4"><i class="bi bi-heart-fill"></i> Become a donor</a>
+        <a href="#requests" class="btn btn-outline-light btn-lg px-4">Browse requests</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Blood compatibility (red cell donation): donor -> recipients
+  const CAN_DONATE_TO = {
+    "O-": ["O-","O+","A-","A+","B-","B+","AB-","AB+"],
+    "O+": ["O+","A+","B+","AB+"],
+    "A-": ["A-","A+","AB-","AB+"],
+    "A+": ["A+","AB+"],
+    "B-": ["B-","B+","AB-","AB+"],
+    "B+": ["B+","AB+"],
+    "AB-":["AB-","AB+"],
+    "AB+":["AB+"]
+  };
+  const btns = document.querySelectorAll('#compatBtns .chip-btn');
+  const out = document.getElementById('compatOut');
+  btns.forEach(b => b.addEventListener('click', () => {
+    btns.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const list = CAN_DONATE_TO[b.dataset.t] || [];
+    out.innerHTML = list.map(t => `<span class="match-pill"><i class="bi bi-check2"></i> ${t.replace('-','−')}</span>`).join('')
+      + `<div class="small text-muted mt-2">That’s <strong>${list.length}</strong> of 8 patient groups you can help.</div>`;
+  }));
+</script>
 {% endblock %}
