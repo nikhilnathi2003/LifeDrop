@@ -1,100 +1,139 @@
 {% extends "base.html" %}
-{% block title %}{{ request_obj.patient }}{% endblock %}
+{% block title %}{{ request_obj.patient }} – LifeDrop{% endblock %}
 {% block content %}
+<div class="container py-4">
+
+<nav aria-label="breadcrumb"><ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item active">{{ request_obj.patient }}</li>
+</ol></nav>
 
 <div class="row g-4">
   <div class="col-lg-7">
-    <div class="card"><div class="card-body p-4">
-      <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-          <h4 class="fw-bold mb-1">{{ request_obj.patient }}</h4>
-          <div class="text-muted small"><i class="bi bi-geo-alt"></i> {{ request_obj.hospital }}, {{ request_obj.city }}</div>
+    <div class="card"><div class="card-body">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <span class="ld-type" style="width:3.5rem;height:3.5rem;font-size:1.2rem">{{ request_obj.blood_type.name }}</span>
+          <div>
+            <h3 class="fw-bold mb-1">{{ request_obj.patient }}</h3>
+            <span class="badge badge-urgency-{{ request_obj.urgency }}">{{ request_obj.get_urgency_display }}</span>
+            <span class="badge bg-{% if request_obj.status == 'open' %}success{% elif request_obj.status == 'matched' %}warning text-dark{% else %}secondary{% endif %}">{{ request_obj.get_status_display }}</span>
+          </div>
         </div>
-        <span class="ld-type">{{ request_obj.blood_type.name }}</span>
+        <form method="post" action="{% url 'toggle_save' request_obj.pk %}">{% csrf_token %}
+          <button class="btn btn-sm {% if is_saved %}btn-primary{% else %}btn-outline-primary{% endif %}" title="Save this request">
+            <i class="bi bi-bookmark{% if is_saved %}-fill{% endif %}"></i>
+          </button>
+        </form>
       </div>
-
-      <div class="mb-3">
-        <span class="badge badge-urgency-{{ request_obj.urgency }}">{{ request_obj.get_urgency_display }}</span>
-        <span class="ld-chip">{{ request_obj.units }} unit{{ request_obj.units|pluralize }}</span>
-        <span class="ld-chip">Status: {{ request_obj.get_status_display }}</span>
-      </div>
-
-      {% if request_obj.notes %}<p>{{ request_obj.notes }}</p>{% endif %}
-
-      <div class="small text-muted">
-        Posted by <strong>{{ request_obj.requester.username }}</strong> on {{ request_obj.created_at|date:"M d, Y" }}
-      </div>
+      <hr>
+      <p class="mb-1"><i class="bi bi-hospital text-danger"></i> <strong>{{ request_obj.hospital }}</strong>, {{ request_obj.city }}</p>
+      <p class="mb-1"><i class="bi bi-droplet text-danger"></i> {{ request_obj.units }} unit{{ request_obj.units|pluralize }} of {{ request_obj.blood_type.name }}</p>
+      <p class="mb-1 text-muted">Posted by <strong>{{ request_obj.requester.username }}</strong>
+        {% if request_obj.requester.donor_profile.is_verified %}<span class="badge badge-verified"><i class="bi bi-patch-check"></i> Verified donor</span>{% endif %}
+        · {{ request_obj.created_at|date:"M d, Y" }}</p>
+      {% if request_obj.notes %}<p class="mt-2">{{ request_obj.notes|linebreaksbr }}</p>{% endif %}
 
       {% if images %}
-      <div class="row g-2 mt-2">
+      <div class="d-flex gap-2 mt-3 flex-wrap">
         {% for img in images %}
-          <div class="col-4">
-            <img src="{{ img.image.url }}" class="img-fluid rounded" alt="{{ img.caption }}">
-            {% if img.caption %}<div class="small text-muted">{{ img.caption }}</div>{% endif %}
+          <div class="position-relative">
+            <img src="{{ img.image.url }}" style="width:100px;height:100px;object-fit:cover;border-radius:.5rem" alt="">
             {% if user == request_obj.requester %}
-              <form method="post" action="{% url 'delete_image' img.pk %}"
-                    onsubmit="return confirm('Remove this photo?');">{% csrf_token %}
-                <button class="btn btn-sm btn-link text-danger text-decoration-none p-0"><i class="bi bi-trash"></i> Remove</button>
+              <form method="post" action="{% url 'delete_image' img.pk %}" class="position-absolute top-0 end-0">{% csrf_token %}
+                <button class="btn btn-sm btn-danger py-0 px-1" title="Delete photo">&times;</button>
               </form>
             {% endif %}
           </div>
         {% endfor %}
       </div>
       {% endif %}
-
-      {% if user == request_obj.requester %}
-      <div class="mt-3 d-flex gap-2">
-        <a href="{% url 'edit_request' request_obj.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
-        <a href="{% url 'upload_images' request_obj.pk %}" class="btn btn-sm btn-outline-secondary">Add photo</a>
-      </div>
-      {% endif %}
     </div></div>
 
-    <div class="card mt-3"><div class="card-body p-4">
-      <h6 class="fw-bold mb-2">
-        Reviews of {{ request_obj.requester.username }}
-        {% if avg_rating %}<span class="text-warning">★ {{ avg_rating|floatformat:1 }}</span>{% endif %}
-      </h6>
-      {% for r in reviews %}
-        <div class="border-bottom py-2">
-          <div class="text-warning">{% for _ in "x"|rjust:r.rating %}★{% endfor %}<span class="text-muted small ms-2">by {{ r.reviewer.username }}</span></div>
-          {% if r.comment %}<div class="small">{{ r.comment }}</div>{% endif %}
+    {% if user == request_obj.requester %}
+    <!-- Owner: who has offered to help -->
+    <div class="card mt-3"><div class="card-body">
+      <h6 class="fw-bold"><i class="bi bi-people-fill text-danger"></i> Offers to help</h6>
+      {% for g in guest_offers %}
+        <div class="border-start border-3 border-danger ps-3 py-2 mb-2">
+          <div class="fw-semibold">{{ g.name }} <span class="badge bg-light text-dark">Guest</span>
+            {% if g.blood_type %}<span class="ld-chip">{{ g.blood_type.name }}</span>{% endif %}</div>
+          <div class="small"><i class="bi bi-telephone text-danger"></i> {{ g.phone }}{% if g.email %} · <i class="bi bi-envelope"></i> {{ g.email }}{% endif %}</div>
+          {% if g.message %}<div class="small text-muted">{{ g.message }}</div>{% endif %}
         </div>
-      {% empty %}
-        <p class="small text-muted mb-0">No reviews yet.</p>
       {% endfor %}
+      {% for m in donor_offers %}
+        <div class="border-start border-3 border-success ps-3 py-2 mb-2">
+          <div class="fw-semibold">{{ m.sender.username }} <span class="badge badge-verified">Member</span></div>
+          <div class="small text-muted">{{ m.body }}</div>
+        </div>
+      {% endfor %}
+      {% if not guest_offers and not donor_offers %}<p class="text-muted small mb-0">No offers yet — share your request to reach more donors.</p>{% endif %}
     </div></div>
+    {% endif %}
   </div>
 
   <div class="col-lg-5">
-    <form method="post" action="{% url 'toggle_saved' request_obj.pk %}" class="mb-3">{% csrf_token %}
-      {% if request_obj.pk in request.session.saved_requests %}
-        <button class="btn btn-outline-secondary w-100"><i class="bi bi-bookmark-fill"></i> Saved — tap to remove</button>
-      {% else %}
-        <button class="btn btn-outline-secondary w-100"><i class="bi bi-bookmark"></i> Save for later</button>
-      {% endif %}
-    </form>
-    <div class="card"><div class="card-body p-4">
-      <h6 class="fw-bold">Can you help?</h6>
-      {% if user.is_authenticated %}
-        {% if user != request_obj.requester %}
-          <form method="post" action="{% url 'offer_to_donate' request_obj.pk %}" class="mb-3">{% csrf_token %}
-            <button class="btn btn-primary w-100"><i class="bi bi-heart-fill"></i> Offer to donate</button>
-          </form>
-          <form method="post" action="{% url 'send_message' request_obj.pk %}">{% csrf_token %}
-            <div class="mb-2">{{ message_form.body }}</div>
-            {% if message_form.body.errors %}<div class="text-danger small mb-2">{{ message_form.body.errors|striptags }}</div>{% endif %}
-            <button class="btn btn-outline-primary w-100">Send a message</button>
-          </form>
-        {% else %}
-          <p class="small text-muted mb-0">This is your request. Offers and messages from donors will arrive for you.</p>
-        {% endif %}
-      {% else %}
-        <p class="small text-muted">Please <a href="{% url 'login' %}">log in</a> to offer to donate or message the requester.</p>
-      {% endif %}
-    </div></div>
-    <a href="{% url 'home' %}" class="btn btn-link mt-2">&larr; Back to all requests</a>
+    {% if user.is_authenticated and user != request_obj.requester %}
+      <div class="card mb-3 border-danger"><div class="card-body text-center">
+        <h6 class="fw-bold">Can you help?</h6>
+        <form method="post" action="{% url 'offer_to_donate' request_obj.pk %}">{% csrf_token %}
+          <button class="btn btn-primary btn-lg w-100"><i class="bi bi-droplet-fill"></i> Offer to donate</button>
+        </form>
+      </div></div>
+      <div class="card mb-3"><div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-chat-dots"></i> Message the requester</h6>
+        <form method="post" action="{% url 'send_message' request_obj.pk %}">{% csrf_token %}
+          {{ message_form.body }}
+          <button class="btn btn-outline-primary btn-sm mt-2">Send message</button>
+        </form>
+      </div></div>
+      <a href="{% url 'leave_review' request_obj.pk %}" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-star"></i> Leave a review</a>
+
+    {% elif user == request_obj.requester %}
+      <div class="card"><div class="card-body">
+        <h6 class="fw-bold">Manage your request</h6>
+        <div class="d-grid gap-2">
+          <a href="{% url 'edit_request' request_obj.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+          <a href="{% url 'upload_images' request_obj.pk %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-image"></i> Add photo</a>
+          {% if request_obj.status != 'fulfilled' %}
+            <form method="post" action="{% url 'mark_fulfilled' request_obj.pk %}">{% csrf_token %}
+              <button class="btn btn-success btn-sm w-100"><i class="bi bi-check2-circle"></i> Mark as fulfilled</button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'reopen_request' request_obj.pk %}">{% csrf_token %}
+              <button class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-arrow-counterclockwise"></i> Reopen request</button>
+            </form>
+          {% endif %}
+        </div>
+      </div></div>
+
+    {% else %}
+      <!-- GUEST: can donate WITHOUT signing in (GA requirement) -->
+      <div class="card border-danger mb-3"><div class="card-body text-center">
+        <span class="ld-ic ic-red mb-2 d-inline-grid"><i class="bi bi-droplet-fill"></i></span>
+        <h6 class="fw-bold">You can help — no account needed</h6>
+        <p class="small text-muted">Leave your name and a phone number and the family will reach out to you directly.</p>
+        <a href="{% url 'guest_donate' request_obj.pk %}" class="btn btn-primary btn-lg w-100"><i class="bi bi-heart-fill"></i> Offer to donate as a guest</a>
+      </div></div>
+      <div class="card"><div class="card-body text-center">
+        <p class="small text-muted mb-2">Have an account? Log in for one-click offers and messaging.</p>
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-outline-secondary btn-sm">Register</a>
+      </div></div>
+    {% endif %}
   </div>
 </div>
 
+<hr class="my-4">
+<h5 class="fw-bold">Requester reviews {% if avg_rating %}<span class="text-warning">{{ avg_rating|floatformat:1 }} <i class="bi bi-star-fill"></i></span>{% endif %}</h5>
+{% for rv in reviews %}
+  <div class="border-bottom py-2">
+    <strong>{{ rv.reviewer.username }}</strong>
+    <span class="text-warning">{% for _ in "x"|rjust:rv.rating %}<i class="bi bi-star-fill"></i>{% endfor %}</span>
+    <div>{{ rv.comment }}</div>
+  </div>
+{% empty %}<p class="text-muted">No reviews yet.</p>{% endfor %}
+
+</div>
 {% endblock %}
