@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Chat with {{ other.username }} – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center"><div class="col-lg-7">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <a href="{% url 'inbox' %}" class="btn btn-sm btn-light"><i class="bi bi-arrow-left"></i></a>
+      <span class="ld-avatar" style="width:2.4rem;height:2.4rem">{{ other.username|first|upper }}</span>
+      <h5 class="fw-bold mb-0">{{ other.username }}</h5>
+    </div>
+
+    <div class="card mb-3"><div class="card-body" style="max-height:60vh;overflow-y:auto">
+      {% for m in msgs %}
+        <div class="d-flex mb-2 {% if m.sender == user %}justify-content-end{% endif %}">
+          <div class="p-2 px-3 rounded-3 {% if m.sender == user %}bg-danger text-white{% else %}bg-light{% endif %}" style="max-width:75%">
+            {% if m.request %}<div class="small {% if m.sender == user %}text-white-50{% else %}text-muted{% endif %}">re: {{ m.request.patient }}</div>{% endif %}
+            {{ m.body }}
+            <div class="small {% if m.sender == user %}text-white-50{% else %}text-muted{% endif %} mt-1">{{ m.created_at|date:"M d, H:i" }}</div>
+          </div>
+        </div>
+      {% empty %}<p class="text-muted text-center">No messages yet — say hello.</p>{% endfor %}
+    </div></div>
+
+    <form method="post" class="d-flex gap-2">{% csrf_token %}
+      {{ form.body }}
+      <button class="btn btn-primary"><i class="bi bi-send"></i></button>
+    </form>
+  </div></div>
+</div>
+{% endblock %}

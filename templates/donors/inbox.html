@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Inbox – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="ld-section-title mb-4"><i class="bi bi-inbox-fill text-danger"></i> Inbox</h2>
+
+  {% if guest_offers %}
+  <h5 class="fw-bold mt-2">Guest offers on your requests</h5>
+  <div class="row g-3 mb-4">
+    {% for g in guest_offers %}
+    <div class="col-md-6"><div class="ld-feature">
+      <div class="d-flex justify-content-between">
+        <span class="fw-semibold">{{ g.name }} <span class="badge bg-light text-dark">Guest</span></span>
+        <span class="small text-muted">{{ g.created_at|date:"M d" }}</span>
+      </div>
+      <div class="small">for <a href="{% url 'request_detail' g.request.pk %}">{{ g.request.patient }}</a>
+        {% if g.blood_type %}· <span class="ld-chip">{{ g.blood_type.name }}</span>{% endif %}</div>
+      <div class="mt-1"><i class="bi bi-telephone text-danger"></i> <strong>{{ g.phone }}</strong>{% if g.email %} · {{ g.email }}{% endif %}</div>
+      {% if g.message %}<div class="small text-muted mt-1">“{{ g.message }}”</div>{% endif %}
+    </div></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <h5 class="fw-bold">Received</h5>
+      {% for m in received %}
+      <div class="ld-feature mb-2">
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'thread' m.sender.username %}" class="fw-semibold text-decoration-none">{{ m.sender.username }}</a>
+          <span class="small text-muted">{{ m.created_at|date:"M d, H:i" }}</span>
+        </div>
+        {% if m.request %}<div class="small">re: <a href="{% url 'request_detail' m.request.pk %}">{{ m.request.patient }}</a></div>{% endif %}
+        <div class="mt-1">{{ m.body }}</div>
+        <a href="{% url 'thread' m.sender.username %}" class="small"><i class="bi bi-reply"></i> Reply</a>
+      </div>
+      {% empty %}<p class="text-muted">No messages yet.</p>{% endfor %}
+    </div>
+    <div class="col-md-6">
+      <h5 class="fw-bold">Sent</h5>
+      {% for m in sent %}
+      <div class="ld-feature mb-2">
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold">To {{ m.receiver.username }}</span>
+          <span class="small text-muted">{{ m.created_at|date:"M d, H:i" }}</span>
+        </div>
+        {% if m.request %}<div class="small">re: <a href="{% url 'request_detail' m.request.pk %}">{{ m.request.patient }}</a></div>{% endif %}
+        <div class="mt-1">{{ m.body }}</div>
+      </div>
+      {% empty %}<p class="text-muted">You haven’t sent any messages.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

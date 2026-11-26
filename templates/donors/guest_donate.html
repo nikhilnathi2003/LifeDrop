@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Offer to donate – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <nav aria-label="breadcrumb"><ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'request_detail' request_obj.pk %}">{{ request_obj.patient }}</a></li>
+        <li class="breadcrumb-item active">Offer to donate</li>
+      </ol></nav>
+
+      <div class="ld-hero2 p-4 mb-4 text-center">
+        <span class="ld-ic ic-red mb-2 d-inline-grid" style="width:3.4rem;height:3.4rem"><i class="bi bi-droplet-fill"></i></span>
+        <h2 class="fw-bold mb-1">Thank you for stepping up</h2>
+        <p class="text-muted mb-0">You’re offering <strong>{{ request_obj.blood_type.name }}</strong> blood for
+          <strong>{{ request_obj.patient }}</strong> at {{ request_obj.hospital }}, {{ request_obj.city }}.
+          <br>No account needed — just leave your details and the family will contact you.</p>
+      </div>
+
+      <div class="card"><div class="card-body p-4">
+        <form method="post">{% csrf_token %}
+          {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Your name</label>
+              {{ form.name }}
+              {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Mobile number</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email</label>
+              {{ form.email }}
+            </div>
+            <div class="col-12">
+              <div class="alert alert-light border small mb-0"><i class="bi bi-info-circle text-danger"></i>
+                Please leave at least a <strong>mobile number or an email</strong> so the family can contact you. No account needed.</div>
+              {% if form.non_field_errors %}<div class="text-danger small mt-1">{{ form.non_field_errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Your blood type</label>
+              {{ form.blood_type }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Note for the family <span class="text-muted small">(optional)</span></label>
+              {{ form.message }}
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary btn-lg px-4"><i class="bi bi-heart-fill"></i> Send my offer</button>
+            <a href="{% url 'request_detail' request_obj.pk %}" class="btn btn-light btn-lg">Cancel</a>
+          </div>
+          <p class="small text-muted mt-3 mb-0"><i class="bi bi-shield-check text-danger"></i> Your details are only shared with the family who posted this request.</p>
+        </form>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

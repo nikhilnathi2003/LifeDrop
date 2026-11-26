@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Your activity – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="ld-section-title mb-1"><i class="bi bi-clock-history text-danger"></i> Your activity</h2>
+  {% if first_visit %}<p class="text-muted">You first visited LifeDrop on {{ first_visit }}.</p>{% endif %}
+
+  <div class="row g-4 mt-1">
+    <div class="col-md-4">
+      <div class="ld-feature h-100">
+        <h6 class="fw-bold">Visits per day</h6>
+        {% for v in visits %}
+          <div class="d-flex justify-content-between border-bottom py-1 small">
+            <span>{{ v.date }}</span><span class="fw-semibold">{{ v.visit_count }}</span>
+          </div>
+        {% empty %}<p class="text-muted small">No visits recorded yet.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ld-feature h-100">
+        <h6 class="fw-bold">Recently viewed</h6>
+        {% for r in recently_viewed %}
+          <div class="py-1 small"><span class="ld-chip">{{ r.blood_type.name }}</span>
+            <a href="{% url 'request_detail' r.pk %}">{{ r.patient }}</a></div>
+        {% empty %}<p class="text-muted small">Nothing viewed yet.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="ld-feature h-100">
+        <h6 class="fw-bold">Recent searches</h6>
+        {% for s in recent_searches %}
+          <div class="py-1 small"><i class="bi bi-search text-danger"></i> {{ s }}</div>
+        {% empty %}<p class="text-muted small">No searches yet.</p>{% endfor %}
+        <a href="{% url 'recent_searches' %}" class="small">Full search history →</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
