@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}My dashboard – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <h2 class="ld-section-title mb-0">Welcome back, {{ user.username }}</h2>
+    <span class="badge badge-verified fs-6"><i class="bi {{ level_icon }}"></i> {{ level }}</span>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="ld-feature text-center py-3"><div class="stat-num text-danger fw-bold fs-3">{{ open_count }}</div><div class="small text-muted">My open requests</div></div></div>
+    <div class="col-6 col-md-3"><div class="ld-feature text-center py-3"><div class="fw-bold fs-3 text-success">{{ offers_made }}</div><div class="small text-muted">Offers I made</div></div></div>
+    <div class="col-6 col-md-3"><div class="ld-feature text-center py-3"><div class="fw-bold fs-3">{{ saved }}</div><div class="small text-muted">Saved requests</div></div></div>
+    <div class="col-6 col-md-3"><div class="ld-feature text-center py-3"><div class="fw-bold fs-3 text-warning">{{ points }}</div><div class="small text-muted">Donor points</div></div></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="ld-feature h-100">
+        <h6 class="fw-bold mb-3">Eligibility</h6>
+        {% if eligible %}
+          <p class="text-success mb-2"><i class="bi bi-check-circle-fill"></i> You’re eligible to donate now.</p>
+        {% else %}
+          <p class="text-danger mb-2"><i class="bi bi-hourglass-split"></i> Next eligible on <strong>{{ next_date }}</strong>.</p>
+        {% endif %}
+        <div class="small text-muted">Blood type: <strong>{{ profile.blood_type.name|default:"not set" }}</strong> ·
+          {% if profile.is_verified %}<span class="badge badge-verified">Verified</span>{% else %}<a href="{% url 'profile' %}">Get verified</a>{% endif %}</div>
+        <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm mt-3">Edit profile</a>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="ld-feature h-100">
+        <h6 class="fw-bold mb-3">My requests</h6>
+        {% for r in my_requests %}
+          <div class="d-flex justify-content-between border-bottom py-2">
+            <a href="{% url 'request_detail' r.pk %}" class="text-decoration-none"><span class="ld-chip">{{ r.blood_type.name }}</span> {{ r.patient }}</a>
+            <span class="badge bg-{% if r.status == 'open' %}success{% elif r.status == 'matched' %}warning text-dark{% else %}secondary{% endif %}">{{ r.get_status_display }}</span>
+          </div>
+        {% empty %}<p class="text-muted small">You haven’t posted any requests. <a href="{% url 'post_request' %}">Post one</a>.</p>{% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 mt-4 flex-wrap">
+    <a href="{% url 'inbox' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-inbox"></i> Inbox</a>
+    <a href="{% url 'saved_requests' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-bookmark"></i> Saved</a>
+    <a href="{% url 'user_history' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-clock-history"></i> My activity</a>
+    <a href="{% url 'donor_directory' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-people"></i> Donor directory</a>
+  </div>
+</div>
+{% endblock %}

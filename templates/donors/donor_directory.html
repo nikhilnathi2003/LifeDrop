@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Donor directory – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow"><i class="bi bi-people-fill"></i> Donors</span>
+    <h2 class="ld-section-title mt-2">Find available donors near you</h2>
+    <p class="text-muted">{{ total }} donor{{ total|pluralize }} currently available.</p>
+  </div>
+
+  <form class="row g-2 justify-content-center mb-4" method="get">
+    <div class="col-sm-4 col-md-3">
+      <select class="form-select" name="blood_type">
+        <option value="">All blood types</option>
+        {% for bt in blood_types %}
+          <option value="{{ bt.id }}" {% if request.GET.blood_type == bt.id|stringformat:'s' %}selected{% endif %}>{{ bt.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-sm-4 col-md-3">
+      <input class="form-control" type="search" name="city" placeholder="City" value="{{ request.GET.city }}">
+    </div>
+    <div class="col-auto"><button class="btn btn-primary"><i class="bi bi-search"></i> Search</button></div>
+  </form>
+
+  <div class="row g-3">
+    {% for d in donors %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="ld-feature h-100 d-flex gap-3 align-items-start">
+        <span class="ld-avatar" style="width:3rem;height:3rem;font-size:1.1rem;flex:0 0 auto">{{ d.user.username|first|upper }}</span>
+        <div>
+          <h6 class="fw-bold mb-1">{{ d.user.username }}
+            {% if d.is_verified %}<span class="badge badge-verified"><i class="bi bi-patch-check"></i></span>{% endif %}</h6>
+          <div class="small">
+            {% if d.blood_type %}<span class="ld-chip">{{ d.blood_type.name }}</span>{% endif %}
+            {% if d.city %}<span class="text-muted"><i class="bi bi-geo-alt"></i> {{ d.city }}</span>{% endif %}
+          </div>
+          <a href="{% url 'donor_public' d.user.username %}" class="small">View profile →</a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="alert alert-light border text-center py-5">
+      <i class="bi bi-people fs-1 text-danger d-block mb-2"></i>
+      No available donors match your search.
+    </div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

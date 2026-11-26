@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ donor.user.username }} – donor – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center"><div class="col-lg-7">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'donor_directory' %}">Donors</a></li>
+      <li class="breadcrumb-item active">{{ donor.user.username }}</li>
+    </ol></nav>
+
+    <div class="card"><div class="card-body p-4">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <span class="ld-avatar" style="width:4rem;height:4rem;font-size:1.6rem">{{ donor.user.username|first|upper }}</span>
+        <div>
+          <h3 class="fw-bold mb-1">{{ donor.user.username }}
+            {% if donor.is_verified %}<span class="badge badge-verified"><i class="bi bi-patch-check"></i> Verified donor</span>{% endif %}</h3>
+          <div>
+            {% if donor.blood_type %}<span class="ld-type" style="width:2.6rem;height:2.6rem;font-size:.9rem">{{ donor.blood_type.name }}</span>{% endif %}
+            {% if donor.available %}<span class="badge bg-success">Available</span>{% else %}<span class="badge bg-secondary">Not available</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row g-3">
+        <div class="col-md-6"><div class="small text-muted">City</div><div class="fw-semibold">{{ donor.city|default:"—" }}</div></div>
+        <div class="col-md-6"><div class="small text-muted">Last donation</div><div class="fw-semibold">{{ donor.last_donation|default:"—" }}</div></div>
+        <div class="col-md-6"><div class="small text-muted">Eligibility</div>
+          <div class="fw-semibold">
+            {% if eligible %}<span class="text-success"><i class="bi bi-check-circle-fill"></i> Eligible to donate now</span>
+            {% else %}<span class="text-danger">Eligible again on {{ next_date }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div></div>
+</div>
+{% endblock %}
