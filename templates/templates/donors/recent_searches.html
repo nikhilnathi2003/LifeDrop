@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Recent searches – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="ld-section-title mb-4"><i class="bi bi-search text-danger"></i> Recent searches</h2>
+  <div class="row g-4">
+    <div class="col-md-7">
+      <h6 class="fw-bold">Saved to your account</h6>
+      {% for s in db_searches %}
+        <div class="ld-feature mb-2 d-flex justify-content-between">
+          <span>{% if s.keyword %}“{{ s.keyword }}”{% endif %}
+            {% if s.blood_type %}<span class="ld-chip">{{ s.blood_type.name }}</span>{% endif %}
+            {% if not s.keyword and not s.blood_type %}<span class="text-muted">(filter)</span>{% endif %}</span>
+          <span class="small text-muted">{{ s.date|date:"M d, H:i" }}</span>
+        </div>
+      {% empty %}<p class="text-muted">No saved searches{% if not user.is_authenticated %} — log in to keep a history{% endif %}.</p>{% endfor %}
+    </div>
+    <div class="col-md-5">
+      <h6 class="fw-bold">This session</h6>
+      {% for s in session_searches %}
+        <div class="py-1"><i class="bi bi-clock-history text-danger"></i> {{ s }}</div>
+      {% empty %}<p class="text-muted small">Nothing yet this session.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

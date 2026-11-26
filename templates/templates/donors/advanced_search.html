@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Search requests – LifeDrop{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <span class="ld-eyebrow"><i class="bi bi-sliders"></i> Advanced search</span>
+    <h2 class="ld-section-title mt-2">Find exactly the right request</h2>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <form method="get" class="ld-feature">
+        <h6 class="fw-bold mb-3">Filters</h6>
+        <label class="form-label small fw-semibold">Blood type</label>
+        <select class="form-select mb-3" name="blood_type">
+          <option value="">Any</option>
+          {% for bt in blood_types %}<option value="{{ bt.id }}" {% if request.GET.blood_type == bt.id|stringformat:'s' %}selected{% endif %}>{{ bt.name }}</option>{% endfor %}
+        </select>
+        <label class="form-label small fw-semibold">City</label>
+        <input class="form-control mb-3" name="city" value="{{ request.GET.city }}" placeholder="Any city">
+        <label class="form-label small fw-semibold">Urgency</label>
+        <select class="form-select mb-3" name="urgency">
+          <option value="">Any</option>
+          <option value="critical" {% if request.GET.urgency == 'critical' %}selected{% endif %}>Critical</option>
+          <option value="urgent" {% if request.GET.urgency == 'urgent' %}selected{% endif %}>Urgent</option>
+          <option value="normal" {% if request.GET.urgency == 'normal' %}selected{% endif %}>Normal</option>
+        </select>
+        <label class="form-label small fw-semibold">Sort by</label>
+        <select class="form-select mb-3" name="sort">
+          <option value="new" {% if request.GET.sort == 'new' %}selected{% endif %}>Newest first</option>
+          <option value="urgency" {% if request.GET.sort == 'urgency' %}selected{% endif %}>Most urgent first</option>
+        </select>
+        <button class="btn btn-primary w-100"><i class="bi bi-search"></i> Search</button>
+      </form>
+
+      {% if popular %}
+      <div class="ld-feature mt-3">
+        <h6 class="fw-bold">Most searched</h6>
+        {% for p in popular %}
+          <a href="?blood_type=&city=&urgency=&sort=new" class="ld-chip text-decoration-none">{{ p.blood_type__name }} · {{ p.n }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-9">
+      <p class="text-muted">{{ total }} matching request{{ total|pluralize }}.</p>
+      <div class="row g-3">
+        {% for r in results %}
+        <div class="col-sm-6">
+          <a href="{% url 'request_detail' r.pk %}" class="text-decoration-none text-reset">
+            <div class="ld-card u-{{ r.urgency }} p-3 h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="ld-type">{{ r.blood_type.name }}</span>
+                <span class="badge badge-urgency-{{ r.urgency }}">{{ r.get_urgency_display }}</span>
+              </div>
+              <div class="fw-semibold mt-2">{{ r.patient }}</div>
+              <div class="small text-muted"><i class="bi bi-hospital"></i> {{ r.hospital }}, {{ r.city }}</div>
+            </div>
+          </a>
+        </div>
+        {% empty %}<div class="col-12"><div class="alert alert-light border text-center py-5">No requests match these filters.</div></div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
