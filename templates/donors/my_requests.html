@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}My requests{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h2 class="ld-section-title mb-0">My blood requests</h2>
+    <a href="{% url 'post_request' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Post a request</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-4"><div class="ld-feature text-center py-3"><div class="stat-num text-danger fw-bold fs-3">{{ stats.total }}</div><div class="small text-muted">Total</div></div></div>
+    <div class="col-4"><div class="ld-feature text-center py-3"><div class="fw-bold fs-3 text-success">{{ stats.open }}</div><div class="small text-muted">Open</div></div></div>
+    <div class="col-4"><div class="ld-feature text-center py-3"><div class="fw-bold fs-3 text-secondary">{{ stats.fulfilled }}</div><div class="small text-muted">Fulfilled</div></div></div>
+  </div>
+
+  <div class="row g-3">
+  {% for r in requests %}
+    <div class="col-md-6"><div class="ld-card u-{{ r.urgency }} p-3">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <a href="{% url 'request_detail' r.pk %}" class="fw-semibold text-reset text-decoration-none fs-5">{{ r.blood_type.name }} · {{ r.patient }}</a>
+          <div class="small text-muted">{{ r.hospital }}, {{ r.city }}</div>
+        </div>
+        <span class="badge bg-{% if r.status == 'open' %}success{% elif r.status == 'matched' %}warning text-dark{% else %}secondary{% endif %}">{{ r.get_status_display }}</span>
+      </div>
+      <div class="mt-2 d-flex gap-2">
+        <a href="{% url 'edit_request' r.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        {% if r.status != 'fulfilled' %}
+          <form method="post" action="{% url 'mark_fulfilled' r.pk %}">{% csrf_token %}<button class="btn btn-sm btn-success">Mark fulfilled</button></form>
+        {% else %}
+          <form method="post" action="{% url 'reopen_request' r.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Reopen</button></form>
+        {% endif %}
+      </div>
+    </div></div>
+  {% empty %}
+    <div class="col-12"><p class="text-muted">You have no requests yet. <a href="{% url 'post_request' %}">Post one</a>.</p></div>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}
